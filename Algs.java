@@ -2,9 +2,9 @@ import java.util.Arrays;
 
 public class Algs {
 	
-	public static void insertionsort(int[] arr) {
-		for(int i = 1; i < arr.length; i++) {
-			for(int j = i; j > 0; j--) {
+	public static void insertionsort(int[] arr, int p, int r) {
+		for(int i = p + 1; i < r + 1; i++) {
+			for(int j = i; j > p; j--) {
 				if (arr[j] < arr[j-1]) {
 					int tmp = arr[j];
 					arr[j] = arr[j-1];
@@ -14,25 +14,25 @@ public class Algs {
 		}
 	}
 	
-	private static int partition(int[] arr, int p, int r) {
-		int pivot = arr[p];
-		int i = p; int j = r;
-		while(true) {
-			while(arr[i] < pivot) i++;
-			while(arr[j] > pivot) j--;
-			if (i >= j) return j;
-			if (arr[i] == arr[j]) { i++; }
-			else {
+	private static int partition(int[] arr, int piv, int p, int r) { // working meme
+		int q = -1;							// pivot has to be in the array
+		int i = p - 1; int j = 0;
+		while (i + j < r) {
+			int curr = arr[i + j + 1];
+			if (curr <= piv) {
+				i++; 
 				int tmp = arr[i];
-				arr[i] = arr[j];
-				arr[j] = tmp;
-			}
+				arr[i] = arr[i+j];
+				arr[i+j] = tmp;
+				if (curr == piv) q = i;
+			} else j++;
 		}
+		return q;
 	}
 	
-	public static void quicksort(int[] arr, int p, int r) { // possibly working
+	public static void quicksort(int[] arr, int p, int r) { // works
 		if (p < r) {
-			int q = partition(arr, p, r);
+			int q = partition(arr, arr[r], p, r);
 			quicksort(arr, p, q-1);
 			quicksort(arr, q+1, r);
 		}
@@ -80,16 +80,9 @@ public class Algs {
 		}
 	}
 	
-	private static boolean checksorted(int[] arr) {
-		for(int i = 1; i < arr.length; i++) {
-			if (arr[i] < arr[i-1]) return false;
-		}
-		return true;
-	}
-	
 	public static void bogo(int[] arr) {
 		long ctr = 0;
-		while(!checksorted(arr)) {
+		while(!AlgsTests.checksorted(arr)) {
 			shuffle(arr);
 			ctr++;
 			if (ctr % 1000 == 0) System.out.println(ctr + " shuffles");
@@ -102,7 +95,7 @@ public class Algs {
 	
 	public static void bozo(int[] arr) {
 		long ctr = 0;
-		while(!checksorted(arr)) {
+		while(!AlgsTests.checksorted(arr)) {
 			int j = (int) (Math.random() * (arr.length));
 			int i = (int) (Math.random() * (arr.length));
 			int tmp = arr[j];
@@ -113,24 +106,47 @@ public class Algs {
 		}
 	}
 	
-	public static int select(int[] arr) {
-		
-		return 0;
+	public static int select(int[] arr, int i, int p, int r) {
+		int length = r - p + 1;								// length of sub-array
+		if (length == 1) return arr[p];						// base case
+		int n = length / 5;									// size of "full" groups
+		int s = (length % 5 == 0) ? n : n + 1;				// size including leftover group
+		int[] meds = new int[s];							// array of medians
+		for(int j = 0; j < s; j++) {						// finding med of each group
+			int idxi = j * 5 + p;
+			int idxf = Math.min(idxi + 4, r);
+			insertionsort(arr, idxi, idxf);
+			meds[j] = arr[idxi + (idxf - idxi) / 2];
+		}
+		int med = select(meds, (meds.length + 1) / 2, 0, meds.length - 1);
+		int q = partition(arr, med, p, r);
+		int k = q - p + 1;
+		if (k == i) return med;
+		else if (k < i) return select(arr, i - k, q + 1, r);
+		return select(arr, i, p, q - 1);
 	}
 	
 	public static void main(String[] args) {
-		int[] a = new int[14];
-		for(int i = 0; i < a.length; i++) {
-			a[i] = ((int) (Math.random() * 100)) + 1;
-		}
+		int n = 15;
+		int[] a = AlgsTests.genarray(n, 5 * n);
 		System.out.println(Arrays.toString(a));
-		/*System.out.println(Boolean.toString(checksorted(a)));
-		insertionsort(a);*/
+		long startTime = System.nanoTime();
+		//System.out.println(Boolean.toString(checksorted(a)));
+		//insertionsort(a, 0, a.length - 1);
 		/*System.out.println(Arrays.toString(shuffle(a)));*/
-		bogo(a);
+		//bogo(a);
 		//heapsort(a, a.length);
 		//quicksort(a, 0, a.length - 1);
+		//partition(a, 0, a.length - 1);
+		int k = (int) (Math.random() * n / 2) + n / 4;
+		int elm = select(a, k, 0, n-1);
+		System.out.println("selected element " + elm + " of rank " + k);
+		quicksort(a, 0, a.length - 1);
+		System.out.println("correct rank printed: " + Boolean.toString(a[k - 1] == elm));
+		long endTime   = System.nanoTime();
+		long totalTime = (endTime - startTime) / 1000000;
 		System.out.println(Arrays.toString(a));
-		System.out.println(Boolean.toString(checksorted(a)));
+		System.out.println(Boolean.toString(AlgsTests.checksorted(a)));
+		System.out.println(totalTime + " ms runtime");
 	}
 }
