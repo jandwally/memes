@@ -19,16 +19,22 @@ public class Algs {
 		int i = p - 1; int j = 0;
 		while (i + j < r) {
 			int curr = arr[i + j + 1];
-			if (curr <= piv) {
+			if (curr < piv) {
 				i++; 
 				int tmp = arr[i];
 				arr[i] = arr[i+j];
 				arr[i+j] = tmp;
-				if (curr == piv) q = i;
-			} else j++;
+				if(tmp == piv) q = i + j;
+			} else {
+				j++;
+				if (curr == piv) q = i + j;
+			}
 		}
-		return q;
-	}
+		int tmp = arr[q];
+		arr[q] = arr[i + 1];
+		arr[i + 1] = tmp;
+		return i + 1;
+	} // if there are multiple copies of pivot, likely one will end up on the > side
 	
 	public static void quicksort(int[] arr, int p, int r) { // works
 		if (p < r) {
@@ -124,12 +130,13 @@ public class Algs {
 		if (k == i) return med;
 		else if (k < i) return select(arr, i - k, q + 1, r);
 		return select(arr, i, p, q - 1);
-	}
+	} // works now
 	
 	public static void main(String[] args) {
-		int n = 15;
-		int[] a = AlgsTests.genarray(n, 5 * n);
-		System.out.println(Arrays.toString(a));
+		int n = 1000000;
+		int[] a = AlgsTests.genarray(n, n * 5);
+		//int[] a = {13, 49, 35, 6, 24, 11, 48, 41, 38, 18};
+		//System.out.println(Arrays.toString(a));
 		long startTime = System.nanoTime();
 		//System.out.println(Boolean.toString(checksorted(a)));
 		//insertionsort(a, 0, a.length - 1);
@@ -137,7 +144,7 @@ public class Algs {
 		//bogo(a);
 		//heapsort(a, a.length);
 		//quicksort(a, 0, a.length - 1);
-		//partition(a, 0, a.length - 1);
+		//partition(a, 24, 0, a.length - 1);
 		int k = (int) (Math.random() * n / 2) + n / 4;
 		int elm = select(a, k, 0, n-1);
 		System.out.println("selected element " + elm + " of rank " + k);
@@ -145,7 +152,7 @@ public class Algs {
 		System.out.println("correct rank printed: " + Boolean.toString(a[k - 1] == elm));
 		long endTime   = System.nanoTime();
 		long totalTime = (endTime - startTime) / 1000000;
-		System.out.println(Arrays.toString(a));
+		//System.out.println(Arrays.toString(a));
 		System.out.println(Boolean.toString(AlgsTests.checksorted(a)));
 		System.out.println(totalTime + " ms runtime");
 	}
