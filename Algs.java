@@ -2,6 +2,22 @@ import java.util.Arrays;
 
 public class Algs {
 	
+	// slightly optimized
+	public static void bubblesort(int[] arr, int p, int r) {
+		for(int i = r + 1; i > p; i--) {
+			int ctr = 0;
+			for(int j = p + 1; j < i; j++) {
+				if (arr[j] < arr[j-1]) {
+					int tmp = arr[j];
+					arr[j] = arr[j-1];
+					arr[j-1] = tmp;
+					ctr++;
+				}
+			}
+			if (ctr == 0) return;
+		}
+	}
+	
 	public static void insertionsort(int[] arr, int p, int r) {
 		for(int i = p + 1; i < r + 1; i++) {
 			for(int j = i; j > p; j--) {
@@ -186,20 +202,39 @@ public class Algs {
 		return select(arr, i, p, q - 1);
 	} // works now
 	
+	private static int[] radpart(int[] arr, int p, int r, int bit) {
+		if (bit > 31) return arr;
+		int ptr = 0;
+		int[] ret = new int[arr.length];
+		for(int i = p; i < r + 1; i++) {
+			if(((arr[i] >>> bit) & 1) == 0) { ret[ptr] = arr[i]; ptr++; }
+		}
+		for(int i = p; i < r + 1; i++) {
+			if(((arr[i] >>> bit) & 1) == 1) { ret[ptr] = arr[i]; ptr++; }
+		}
+		return radpart(ret, p, r, bit + 1);
+	} // not very fast ~2n
+	
+	public static int[] radixsort(int[] arr, int p, int r) {
+		return radpart(arr, p, r, 0); // only works for positives
+	} // might write a legit one later
+	
 	public static void main(String[] args) {
-		int n = 1000000;
+		int n = 100000;
 		int[] a = AlgsTests.genarray(n, n * 5);
 		//System.out.println(Arrays.toString(a));
 		long startTime = System.nanoTime();
 		//insertionsort(a, 0, a.length - 1);
 		/*System.out.println(Arrays.toString(shuffle(a)));*/
 		//bogo(a);
-		heapsort(a, 0, a.length - 1);
+		//heapsort(a, 0, a.length - 1);
 		//quicksort(a, 0, a.length - 1);
 		//partition(a, 24, 0, a.length - 1);
 		//selectionsort(a, 0, a.length / 2);
 		//keemsort(a, 0, a.length - 1);
 		//a = mergesort(a, 0, a.length - 1);
+		//a = radixsort(a, 0, a.length - 1);
+		bubblesort(a, 0, a.length - 1);
 		/*int k = (int) (Math.random() * n / 2) + n / 4;
 		int elm = select(a, k, 0, n-1);
 		System.out.println("selected element " + elm + " of rank " + k);
