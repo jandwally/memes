@@ -14,6 +14,59 @@ public class Algs {
 		}
 	}
 	
+	public static void selectionsort(int[] arr, int p, int r) {
+		for(int i = 0; i < r - p; i++) {
+			int idx = p + i;
+			for(int j = p + i; j < r + 1; j++) {
+				if (arr[j] < arr[idx])  idx = j; 
+			}
+			int tmp = arr[p+i];
+			arr[p+i] = arr[idx];
+			arr[idx] = tmp;
+		}
+	}
+	
+	// selection from both directions
+	public static void breadsort(int[] arr, int p, int r) {
+		// unimplemented
+	}
+	
+	// unoptimized gnome sort
+	public static void keemsort(int[] arr, int p, int r) {
+		int ptr = p + 1;
+		while(ptr < r + 1) {
+			if (ptr == p || arr[ptr] >= arr[ptr-1]) ptr++;
+			else {
+				int tmp = arr[ptr];
+				arr[ptr] = arr[ptr-1];
+				arr[ptr-1] = tmp;
+				ptr--;
+			}
+		}
+	}
+	
+	private static int[] merge(int[] a1, int[] a2) {
+		int[] arr = new int[a1.length + a2.length];
+		int p1 = 0; int p2 = 0; int i = 0;
+		while (p1 < a1.length && p2 < a2.length) {
+			if (a1[p1] < a2[p2]) { arr[i] = a1[p1]; p1++; i++; }
+			else { arr[i] = a2[p2]; p2++; i++; }
+		}
+		while (p1 < a1.length) { arr[i] = a1[p1]; p1++; i++; }
+		while (p2 < a2.length) { arr[i] = a2[p2]; p2++; i++; }
+		return arr;
+	}
+	
+	public static int[] mergesort(int[] arr, int p, int r) {
+		if (r > p) {
+			int[] a1 = mergesort(arr, p, p + (r - p) / 2);
+			int[] a2 = mergesort(arr, p + 1 + (r - p) / 2, r);
+			return merge(a1, a2);
+		}
+		int[] out = {arr[p]};
+		return out;
+	}
+	
 	private static int partition(int[] arr, int piv, int p, int r) { // working meme
 		int q = -1;							// pivot has to be in the array
 		int i = p - 1; int j = 0;
@@ -44,37 +97,37 @@ public class Algs {
 		}
 	}
 	
-	public static void heapsort(int[] arr, int n) {
-		buildmaxheap(arr, n);
-		for(int i = n; i > 0; i--) {
-			delmax(arr, i);
+	public static void heapsort(int[] arr, int p, int r) {
+		buildmaxheap(arr, p, r);
+		for(int i = r; i > p - 1; i--) {
+			delmax(arr, p, i);
 		}
 	}
 	
-	public static void buildmaxheap(int[] arr, int n) {
-		for(int i = arr.length - 1; i > -1; i--) {
-			maxheapify(arr, n, i);
+	public static void buildmaxheap(int[] arr, int p, int r) {
+		for(int i = r; i > p - 1; i--) {
+			maxheapify(arr, p, r, i);
 		}
 	}
 	
-	public static void maxheapify(int[] arr, int n, int i) {
+	public static void maxheapify(int[] arr, int p, int r, int i) {
 		int max = i;
-		int ri = 2 * (i + 1);
+		int ri = 2 * (i + 1 - p) + p;
 		int li = ri - 1;
-		if (ri < n && arr[ri] > arr[max]) max = ri;
-		if (li < n && arr[li] > arr[max]) max = li;
+		if (ri < r + 1 && arr[ri] > arr[max]) max = ri;
+		if (li < r + 1 && arr[li] > arr[max]) max = li;
 		if (max == i) return;
 		int tmp = arr[max];
 		arr[max] = arr[i];
 		arr[i] = tmp;
-		maxheapify(arr, n, max);
+		maxheapify(arr, p, r, max);
 	}
 	
-	public static void delmax(int[] arr, int n) {
-		int tmp = arr[0];
-		arr[0] = arr[n-1];
-		arr[n-1] = tmp;
-		maxheapify(arr, n-1, 0);
+	public static void delmax(int[] arr, int p, int r) {
+		int tmp = arr[p];
+		arr[p] = arr[r];
+		arr[r] = tmp;
+		maxheapify(arr, p, r - 1, p);
 	}
 	
 	public static void shuffle(int[] arr) {
@@ -96,6 +149,7 @@ public class Algs {
 	}
 	
 	public static int[] boombogo(int[] arr) {
+		// unimplemented
 		return arr;
 	}
 	
@@ -135,25 +189,26 @@ public class Algs {
 	public static void main(String[] args) {
 		int n = 1000000;
 		int[] a = AlgsTests.genarray(n, n * 5);
-		//int[] a = {13, 49, 35, 6, 24, 11, 48, 41, 38, 18};
 		//System.out.println(Arrays.toString(a));
 		long startTime = System.nanoTime();
-		//System.out.println(Boolean.toString(checksorted(a)));
 		//insertionsort(a, 0, a.length - 1);
 		/*System.out.println(Arrays.toString(shuffle(a)));*/
 		//bogo(a);
-		//heapsort(a, a.length);
+		heapsort(a, 0, a.length - 1);
 		//quicksort(a, 0, a.length - 1);
 		//partition(a, 24, 0, a.length - 1);
-		int k = (int) (Math.random() * n / 2) + n / 4;
+		//selectionsort(a, 0, a.length / 2);
+		//keemsort(a, 0, a.length - 1);
+		//a = mergesort(a, 0, a.length - 1);
+		/*int k = (int) (Math.random() * n / 2) + n / 4;
 		int elm = select(a, k, 0, n-1);
 		System.out.println("selected element " + elm + " of rank " + k);
 		quicksort(a, 0, a.length - 1);
-		System.out.println("correct rank printed: " + Boolean.toString(a[k - 1] == elm));
+		System.out.println("correct rank printed: " + Boolean.toString(a[k - 1] == elm));*/
 		long endTime   = System.nanoTime();
 		long totalTime = (endTime - startTime) / 1000000;
 		//System.out.println(Arrays.toString(a));
-		System.out.println(Boolean.toString(AlgsTests.checksorted(a)));
+		System.out.println("array is sorted: " + Boolean.toString(AlgsTests.checksorted(a)));
 		System.out.println(totalTime + " ms runtime");
 	}
 }
